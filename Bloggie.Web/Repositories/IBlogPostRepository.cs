@@ -11,5 +11,7 @@ namespace Bloggie.Web.Repositories
         Task<IEnumerable<BlogPost>> GetAllAsync();
         Task<BlogPost?> GetAsync(Guid id);
         Task<BlogPost?> UpdateAsync(BlogPost model);
+
+        Task<BlogPost?> GetByUrlHandleAsync(string urlHandle);
     }
 }

@@ -12,7 +12,7 @@
     <form method="post">
         <div class="mb-3">
             <label class="form-label">Heading</label>
-            <input type="text" class="form-control" id="heading" asp-for="Heading"/>
+            <input type="text" class="form-control" id="heading" asp-for="Heading" />
         </div>
         <div class="mb-3">
             <label class="form-label">Page Title</label>
@@ -24,7 +24,12 @@
         </div>
         <div class="mb-3">
             <label class="form-label">Short Description</label>
-            <input type="text" class="form-control" id="shortDescription" asp-for="ShortDesciption" />
+            <input type="text" class="form-control" id="shortDescription" asp-for="ShortDescription" />
+        </div>
+        <div class="mb-3">
+            <lable class="form-lable">Featured Image Uplaod</lable>
+            <input type="file" id="featuredImageUpload" class="form-control"/>
+            <img src="" id="featuredImageDisplay" style="display:none"; width:"300px" />
         </div>
         <div class="mb-3">
             <label class="form-label">Featured Image Url</label>
@@ -55,3 +60,32 @@
         </div>
     </form>
 </div>
+
+@section Scripts
+{
+    <script>
+        var editor = new FroalaEditor("#content", {imgaeUploadURL : '/api/Images'});
+
+        const featuredUploadElement = document.getElementById("featuredImageUpload");
+        const featuredImageUrlElement = document.getElementById("featuredImageUrl");
+        const featuredImageElement = document.getElementById("featuredImageDisplay")
+        async function uploadFeaturedImage(e)
+        {
+            let data = new FormData();
+            data.append("file", e.target.files[0])
+            await fetch('/api/Images', {
+                method:'Post',
+                headers: {
+                    'Accept':'*/*'
+                },
+                body:data,
+            }).then(response => response.json())
+            .then(result => { 
+                featuredImageUrlElement.value = result.link 
+                featuredImageDisplay.src = result.link;
+                featuredImageDisplay.style.display = 'block';
+            })
+        }
+        featuredUploadElement.addEventListener("change", uploadFeaturedImage);
+    </script>
+}

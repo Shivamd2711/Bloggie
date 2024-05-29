@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Bloggie.Web.Models.Domain;
 
 namespace Bloggie.Web.Models.ViewModels
 {
-    public class AddBlogPostRequest
+    public class BlogDetailsViewModel
     {
+        public Guid Id { get; set; }
         public string Heading { get; set; }
         public string PageTitle { get; set; }
         public string Content { get; set; }
@@ -13,10 +14,14 @@ namespace Bloggie.Web.Models.ViewModels
         public DateTime PublishDate { get; set; }
         public string Author { get; set; }
         public bool Visible { get; set; }
+        public ICollection<Tag> Tags { get; set; }
 
-        public IEnumerable<SelectListItem> Tags { get; set; }   
+        public int TotalLikes {  get; set; } 
+        
+        public bool Liked { get;set; }
 
-        public string[] SelectedTags { get; set; } = Array.Empty<string>();
+        public string CommentDescription { get; set; }
+        public IEnumerable<BlogCommentViewModel> Comment { get; set; }
 
     }
 }

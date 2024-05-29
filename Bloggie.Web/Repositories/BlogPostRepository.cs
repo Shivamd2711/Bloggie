@@ -1,5 +1,6 @@
 ﻿using Bloggie.Web.Data;
 using Bloggie.Web.Models.Domain;
+using Bloggie.Web.Models.ViewModels;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bloggie.Web.Repositories
@@ -22,30 +23,57 @@ namespace Bloggie.Web.Repositories
             return model;
         }
 
-        public Task<BlogPost?> DeleteAsync(Guid id)
+        public async Task<BlogPost?> DeleteAsync(Guid id)
         {
-            throw new NotImplementedException();
+            var existingBlogPost = await db.BlogPosts.FindAsync(id);
+            if (existingBlogPost != null)
+            {
+                db.BlogPosts.Remove(existingBlogPost);
+                await db.SaveChangesAsync();
+                return existingBlogPost;
+            }
+            return null;
+
         }
 
         public async Task<IEnumerable<BlogPost>> GetAllAsync()
         {
             //Inlcude is used to inclue the Tags Property,for you have to mention the Tags Property in entity class
             //so that EF should know this during migration and while contacting db
-            return await db.BlogPosts.Include(x=> x.Tags).ToListAsync();    
+            return await db.BlogPosts.Include(x => x.Tags).ToListAsync();
         }
 
-        public Task<BlogPost?> GetAsync(Guid id)
+        public async Task<BlogPost?> GetAsync(Guid id)
         {
-            var blogPost = db.BlogPosts.Include(i=>i.Tags).FirstOrDefaultAsync(i=>i.Id == id);
-            if(blogPost == null)
+            return await db.BlogPosts.Include(i => i.Tags).FirstOrDefaultAsync(i => i.Id == id);
+        }
+
+        public async Task<BlogPost?> UpdateAsync(BlogPost model)
+        {
+            var existingBlogpost = await db.BlogPosts.Include(x => x.Tags).FirstOrDefaultAsync(x => x.Id == model.Id);
+            if (existingBlogpost != null)
             {
+                existingBlogpost.Id = model.Id;
+                existingBlogpost.Tags = model.Tags;
+                existingBlogpost.Heading = model.Heading;
+                existingBlogpost.Author = model.Author;
+                existingBlogpost.Content = model.Content;
+                existingBlogpost.ShortDescription = model.ShortDescription;
+                existingBlogpost.Visible = model.Visible;
+                existingBlogpost.FeaturedImageUrl = model.FeaturedImageUrl;
+                existingBlogpost.UrlHandle = model.UrlHandle;
+                existingBlogpost.PublishDate = model.PublishDate;
+                existingBlogpost.PageTitle = model.PageTitle;
 
+                await db.SaveChangesAsync();
+                return existingBlogpost;
             }
+            return null;
         }
 
-        public Task<BlogPost?> UpdateAsync(BlogPost model)
+        public async Task<BlogPost?> GetByUrlHandleAsync(string urlHandle)
         {
-            throw new NotImplementedException();
+            return await db.BlogPosts.Include(x => x.Tags).FirstOrDefaultAsync(x => x.UrlHandle == urlHandle);
         }
     }
 }

@@ -1,34 +1,28 @@
-﻿@model Bloggie.Web.Models.Domain.Tag;
-@{
-}
-<div class="bg-secondary bg-opacity-10 py-2">
-    <div class="container">
-        <h1>Edit Tag - Admin Functionality</h1>
-    </div>
-</div>
+﻿@model Bloggie.Web.Models.ViewModels.EditTagRequest
 
 <div class="container py-5">
-
-    <form method="post">
-        <div class="mb-3">
-            <label class="form-label">Id</label>
-            <input type="text" class="form-control" id="Id" asp-for="Id" value="@Model.Id"  readonly/>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Name</label>
-            <input type="text" class="form-control" id="name" asp-for="Name" value="@Model.Name" />
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Display Name</label>
-            <input type="text" class="form-control" id=" displayName" asp-for="DisplayName" value="@Model.DisplayName" />
-        </div>
-        <div class="mb-3">
-            <div class="d-flex">
-                <button type="submit" class="btn btn-dark">Update</button>
-                <button class="btn btn-danger ms-2" type="submit" asp-area="" asp-controller="AdminTags" asp-action="Delete">Delete</button>
-                <button class="btn btn-light ms-2" type="button" asp-controller="AdminTags" asp-action="List">Cancel</button>
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning text-dark">
+                    <h2 class="mb-0">Edit Tag</h2>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        <div class="mb-3">
+                            <label class="form-label">Name</label>
+                            <input type="text" class="form-control" asp-for="Name" required />
+                            <span class="text-danger" asp-validation-for="Name"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Display Name</label>
+                            <input type="text" class="form-control" asp-for="DisplayName" required />
+                            <span class="text-danger" asp-validation-for="DisplayName"></span>
+                        </div>
+                        <button type="submit" class="btn btn-warning w-100">Update</button>
+                    </form>
+                </div>
             </div>
-
         </div>
-    </form>
+    </div>
 </div>

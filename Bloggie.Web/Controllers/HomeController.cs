@@ -22,7 +22,7 @@ namespace Bloggie.Web.Controllers
         public async Task<IActionResult> Index()
         {
             var blogPosts = await _blogPostRepository.GetAllAsync();
-            var tags = await _tagRepository.GetAllAsync();
+            var tags = await _tagRepository.GetAllAsync(null, null, null);
             var model = new HomeViewModel()
             {
                 BlogPosts = blogPosts,

@@ -1,6 +1,10 @@
-﻿using Bloggie.Web.Models.ViewModels;
+﻿using Bloggie.Web.Models.EmailModels;
+using Bloggie.Web.Models.ViewModels;
+using Bloggie.Web.Services;
+using MailKit;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using IMailService = Bloggie.Web.Services.IMailService;
 
 namespace Bloggie.Web.Controllers
 {
@@ -8,11 +12,13 @@ namespace Bloggie.Web.Controllers
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly SignInManager<IdentityUser> _signInManager;
-        public AccountController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager)
+        private readonly IMailService mailService;
+        public AccountController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager, IMailService mailService)
         {
             this._userManager = userManager;
             _signInManager = signInManager;
             this._signInManager = signInManager;
+            this.mailService = mailService;
         }
         [HttpGet]
         public IActionResult Register()
@@ -33,6 +39,12 @@ namespace Bloggie.Web.Controllers
                 var result = await _userManager.CreateAsync(identityUser, model.Password);
                 if (result.Succeeded)
                 {
+                    EmailRequestModel emailModel = new EmailRequestModel();
+                    emailModel.Subject = "Account created successfully";
+                    emailModel.ToEmail = model.Email;
+                    emailModel.Body = "Your Account has been successfully created. Thank you.";
+                        
+                    await mailService.SendEmailAsync(emailModel);
                     var roleAssignedResult = await _userManager.AddToRoleAsync(identityUser, "User");
                     if (roleAssignedResult.Succeeded)
                     {
@@ -60,7 +72,12 @@ namespace Bloggie.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                var signInResult = await _signInManager.PasswordSignInAsync(model.UserName, model.Password, false, false);
+                var signInResult = await _signInManager.PasswordSignInAsync(
+                    model.UserName, 
+                    model.Password, 
+                    model.RememberMe, // Use RememberMe here
+                    false);
+
                 if (signInResult != null && signInResult.Succeeded)
                 {
                     if (!string.IsNullOrWhiteSpace(model.returnUrl))

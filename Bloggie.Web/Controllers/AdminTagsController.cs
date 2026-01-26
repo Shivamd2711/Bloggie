@@ -48,9 +48,33 @@ namespace Bloggie.Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> List()
+        public async Task<IActionResult> List(
+            string? searchQuery = null, 
+            string? sortBy = null, 
+            string? sortDirection = null, 
+            int pageSize = 3, 
+            int pageNumber = 1)
         {
-            var tags = await tagRepository.GetAllAsync();
+            var totalRecords = await tagRepository.CountAsync();
+            var totalPages = Math.Ceiling((double)totalRecords / pageSize);
+
+            if(pageNumber > totalPages)
+            {
+                pageNumber--;
+            }
+            if (pageNumber < 1)
+            {
+                pageNumber++;
+            }
+            ViewBag.TotalPages = totalPages;
+            ViewBag.SearchQuery = searchQuery;
+            ViewBag.SortBy = sortBy;
+            ViewBag.SortDirection = sortDirection;
+            ViewBag.PageNumber = pageNumber;
+            ViewBag.PageSize = pageSize;    
+
+            var tags = await tagRepository.GetAllAsync(searchQuery, sortBy, sortDirection, pageSize, pageNumber);
+
             return View(tags);
         }
 

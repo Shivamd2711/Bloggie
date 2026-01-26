@@ -23,7 +23,7 @@ namespace Bloggie.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> Add()
         {
-            var tags = await _tagRepository.GetAllAsync();
+            var tags = await _tagRepository.GetAllAsync(null,null,null);
             var model = new AddBlogPostRequest
             {
                 Tags = tags.Select(x => new SelectListItem { Text = x.Name, Value = x.Id.ToString() })
@@ -78,7 +78,7 @@ namespace Bloggie.Web.Controllers
         public async Task<IActionResult> Edit(Guid id)
         {
             var blogPost = await _blogPostRepository.GetAsync(id);
-            var tags = await _tagRepository.GetAllAsync();
+            var tags = await _tagRepository.GetAllAsync(null, null, null);
             if (blogPost != null)
             {
                 EditBlogPostRequest model = new EditBlogPostRequest

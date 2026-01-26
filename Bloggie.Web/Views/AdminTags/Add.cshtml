@@ -8,20 +8,28 @@
 </div>
 
 <div class="container py-5">
-    <form method="post">
-        <div class="mb-3">
-            <label class="form-label">Name</label>
-            <input type="text" class="form-control" id="name" asp-for="Name" required/>
-            <span class="text-danger" asp-validation-for="Name"></span>
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0">Add New Tag</h2>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        <div class="mb-3">
+                            <label class="form-label">Name</label>
+                            <input type="text" class="form-control" asp-for="Name" required />
+                            <span class="text-danger" asp-validation-for="Name"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Display Name</label>
+                            <input type="text" class="form-control" asp-for="DisplayName" required />
+                            <span class="text-danger" asp-validation-for="DisplayName"></span>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Submit</button>
+                    </form>
+                </div>
+            </div>
         </div>
-        <div class="mb-3">
-            <label class="form-label">Display Name</label>
-            <input type="text" class="form-control" id=" displayName" asp-for="DisplayName" required/>
-            <span class="text-danger" asp-validation-for="DisplayName"></span>
-        </div>
-        <div class="mb-3">
-            <button type="submit" class="btn btn-dark">Submit</button>
-        </div>
-    </form>
-
+    </div>
 </div>

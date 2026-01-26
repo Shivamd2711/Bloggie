@@ -7,9 +7,9 @@ namespace Bloggie.Web.Models.ViewModels
         [Required]
         public string UserName { get; set; }
         [Required]
-        [MinLength(6, ErrorMessage ="Password atlest to be 6 charachters")]
+        [MinLength(6, ErrorMessage = "Password at least to be 6 characters")]
         public string Password { get; set; }
-
-        public string? returnUrl {  get; set; } 
+        public string? returnUrl { get; set; }
+        public bool RememberMe { get; set; } // Add this line
     }
 }

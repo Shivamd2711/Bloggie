@@ -1,7 +1,10 @@
 using Bloggie.Web.Data;
+using Bloggie.Web.Models.EmailModels;
 using Bloggie.Web.Repositories;
+using Bloggie.Web.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,7 +37,11 @@ builder.Services.AddScoped<IBlogPostRepository, BlogPostRepository>();
 builder.Services.AddScoped<IImageRepository, ImageRepository>();
 builder.Services.AddScoped<IBlogPostLikeRepository, BlogPostLikeRepository>();
 builder.Services.AddScoped<IBlogPostCommentRepository, BlogPostCommentRepository>(); 
-builder.Services.AddScoped<IUserRepository, UserRepository>();  
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+builder.Services.Configure<MailSettingModel>(
+    builder.Configuration.GetSection("MailSettings"));
+builder.Services.AddScoped<IMailService, MailService>();
 
 var app = builder.Build();
 

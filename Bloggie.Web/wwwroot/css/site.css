@@ -19,8 +19,65 @@ html {
 
 body {
   margin-bottom: 60px;
+  font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+  background-color: #f8f9fa;
+}
+
+.card-header {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+footer {
+  letter-spacing: 0.5px;
 }
 
 .blog-detail-content img{
     max-width:100%
+}
+
+.table-hover tbody tr:hover {
+  background-color: #f1f1f1;
+}
+
+.table th {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.card {
+  border: none;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.btn-success {
+  background-color: #28a745;
+  border-color: #28a745;
+}
+
+.btn-success:hover {
+  background-color: #218838;
+  border-color: #1e7e34;
+}
+
+.btn-outline-primary {
+  color: #007bff;
+  border-color: #007bff;
+}
+
+.btn-outline-primary:hover {
+  background-color: #007bff;
+  color: white;
+}
+
+.btn-outline-danger {
+  color: #dc3545;
+  border-color: #dc3545;
+}
+
+.btn-outline-danger:hover {
+  background-color: #dc3545;
+  color: white;
 }

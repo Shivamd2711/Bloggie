@@ -5,9 +5,12 @@ using System.Net;
 
 namespace Bloggie.Web.Controllers
 {
+    /// <summary>
     // it is api controller  so it does not expect to return a view from action method 
     // it expect http responses.(200, 400, 500 etc)
     //  route  - https://localhost:50006/ api/images like this 
+    /// </summary>
+
     [Route("api/[controller]")]
     [ApiController]
     public class ImagesController : ControllerBase

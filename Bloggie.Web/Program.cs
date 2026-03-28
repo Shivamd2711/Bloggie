@@ -1,5 +1,7 @@
 using System;
 using System.IO;
+using System.Net;
+using System.Net.Sockets;
 using Bloggie.Web.Data;
 using Bloggie.Web.Models.EmailModels;
 using Bloggie.Web.Repositories;
@@ -14,16 +16,33 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 // DATABASE configuration: respect DATABASE_URL (Supabase) or fall back to local SQL Server.
+// Parse DATABASE_URL (Supabase/Render) and prefer IPv4 when available
 var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
 if (!string.IsNullOrWhiteSpace(databaseUrl))
 {
-    // Parse DATABASE_URL (postgres://user:pass@host:port/dbname)
     var uri = new Uri(databaseUrl);
     var userInfo = uri.UserInfo.Split(':', StringSplitOptions.RemoveEmptyEntries);
 
+    // Try to resolve host to IPv4 to avoid IPv6 connectivity issues in some containers/networks
+    string hostToUse = uri.Host;
+    try
+    {
+        var addresses = Dns.GetHostAddresses(uri.Host);
+        var ipv4 = Array.Find(addresses, a => a.AddressFamily == AddressFamily.InterNetwork);
+        if (ipv4 != null)
+        {
+            hostToUse = ipv4.ToString();
+        }
+    }
+    catch (Exception dnsEx)
+    {
+        // DNS resolution failed — fall back to original hostname
+        Console.WriteLine($"Warning: DNS lookup failed for {uri.Host}: {dnsEx.Message}");
+    }
+
     var npgsql = new NpgsqlConnectionStringBuilder
     {
-        Host = uri.Host,
+        Host = hostToUse,
         Port = uri.Port,
         Username = userInfo.Length > 0 ? userInfo[0] : string.Empty,
         Password = userInfo.Length > 1 ? userInfo[1] : string.Empty,

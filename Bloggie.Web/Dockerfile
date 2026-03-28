@@ -7,10 +7,10 @@ ENV ASPNETCORE_ENVIRONMENT=Production
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["Bloggie/Bloggie.Web/Bloggie.Web.csproj", "Bloggie/Bloggie.Web/"]
+COPY ["Bloggie.Web.csproj", "./"]
 RUN dotnet restore "./Bloggie.Web/Bloggie.Web.csproj"
 COPY . .
-WORKDIR "/src/Bloggie/Bloggie.Web"
+WORKDIR "/src"
 RUN dotnet build "./Bloggie.Web.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish

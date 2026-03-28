@@ -104,9 +104,9 @@ using (var scope = app.Services.CreateScope())
         var blogDb = services.GetRequiredService<BloggieDbContext>();
         var authDb = services.GetRequiredService<AuthDbContext>();
 
-        // Apply migrations
-        blogDb.Database.Migrate();
-        authDb.Database.Migrate();
+        //// Apply migrations
+        //blogDb.Database.Migrate();
+        //authDb.Database.Migrate();
 
         // If no blog posts exist, run the SQL seed file (if present)
         if (!blogDb.BlogPosts.Any())

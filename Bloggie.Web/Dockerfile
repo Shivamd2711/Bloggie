@@ -7,10 +7,13 @@ ENV ASPNETCORE_ENVIRONMENT=Production
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
+
+# Copy only the project file and restore first (faster caching)
 COPY ["Bloggie.Web.csproj", "./"]
-RUN dotnet restore "./Bloggie.Web/Bloggie.Web.csproj"
+RUN dotnet restore "./Bloggie.Web.csproj"
+
+# Copy the rest and build
 COPY . .
-WORKDIR "/src"
 RUN dotnet build "./Bloggie.Web.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish

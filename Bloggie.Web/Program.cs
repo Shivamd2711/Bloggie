@@ -108,20 +108,20 @@ using (var scope = app.Services.CreateScope())
         //blogDb.Database.Migrate();
         //authDb.Database.Migrate();
 
-        // If no blog posts exist, run the SQL seed file (if present)
-        if (!blogDb.BlogPosts.Any())
-        {
-            var seedFilePath = Path.Combine(AppContext.BaseDirectory, "seed", "dummydata.sql");
-            if (File.Exists(seedFilePath))
-            {
-                var sql = File.ReadAllText(seedFilePath);
-                if (!string.IsNullOrWhiteSpace(sql))
-                {
-                    // Execute raw SQL against Postgres (works for multiple statements)
-                    await blogDb.Database.ExecuteSqlRawAsync(sql);
-                }
-            }
-        }
+        //// If no blog posts exist, run the SQL seed file (if present)
+        //if (!blogDb.BlogPosts.Any())
+        //{
+        //    var seedFilePath = Path.Combine(AppContext.BaseDirectory, "seed", "dummydata.sql");
+        //    if (File.Exists(seedFilePath))
+        //    {
+        //        var sql = File.ReadAllText(seedFilePath);
+        //        if (!string.IsNullOrWhiteSpace(sql))
+        //        {
+        //            // Execute raw SQL against Postgres (works for multiple statements)
+        //            await blogDb.Database.ExecuteSqlRawAsync(sql);
+        //        }
+        //    }
+        //}
     }
     catch (Exception ex)
     {

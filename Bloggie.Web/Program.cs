@@ -1,42 +1,73 @@
+using System;
+using System.IO;
 using Bloggie.Web.Data;
 using Bloggie.Web.Models.EmailModels;
 using Bloggie.Web.Repositories;
 using Bloggie.Web.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
+using Npgsql;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-//Injecting Db context in our application
-builder.Services.AddDbContext<BloggieDbContext>(options=>
-options.UseSqlServer(builder.Configuration.GetConnectionString("BloggieDbConnectionString")));
+// DATABASE configuration: respect DATABASE_URL (Supabase) or fall back to local SQL Server.
+var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+if (!string.IsNullOrWhiteSpace(databaseUrl))
+{
+    // Parse DATABASE_URL (postgres://user:pass@host:port/dbname)
+    var uri = new Uri(databaseUrl);
+    var userInfo = uri.UserInfo.Split(':', StringSplitOptions.RemoveEmptyEntries);
 
-builder.Services.AddDbContext<AuthDbContext>(options =>
-options.UseSqlServer(builder.Configuration.GetConnectionString("BloggieAuthDbConnectionString")));
+    var npgsql = new NpgsqlConnectionStringBuilder
+    {
+        Host = uri.Host,
+        Port = uri.Port,
+        Username = userInfo.Length > 0 ? userInfo[0] : string.Empty,
+        Password = userInfo.Length > 1 ? userInfo[1] : string.Empty,
+        Database = uri.AbsolutePath.TrimStart('/'),
+        SslMode = SslMode.Require,
+        TrustServerCertificate = true
+    };
 
-//by below line we are informing our application that we are using Identity auth db and use IdentityUser and IdentityRole as T user and T role 
+    var connString = npgsql.ToString();
+
+    builder.Services.AddDbContext<BloggieDbContext>(options =>
+        options.UseNpgsql(connString));
+
+    builder.Services.AddDbContext<AuthDbContext>(options =>
+        options.UseNpgsql(connString));
+}
+else
+{
+    // Local development (SQL Server)
+    builder.Services.AddDbContext<BloggieDbContext>(options =>
+        options.UseSqlServer(builder.Configuration.GetConnectionString("BloggieDbConnectionString")));
+
+    builder.Services.AddDbContext<AuthDbContext>(options =>
+        options.UseSqlServer(builder.Configuration.GetConnectionString("BloggieAuthDbConnectionString")));
+}
+
+// Identity
 builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<AuthDbContext>();
 
 builder.Services.Configure<IdentityOptions>(options =>
 {
-    options.Password.RequireDigit = true;   
+    options.Password.RequireDigit = true;
     options.Password.RequireNonAlphanumeric = true;
     options.Password.RequireUppercase = true;
     options.Password.RequiredLength = 6;
     options.Password.RequiredUniqueChars = 1;
-
 });
 
-//add a injection inside a services when  somebody when calls the ItagRepository and give instance of implementaion Tagrepository
+// Repositories / services
 builder.Services.AddScoped<ITagRepository, TagRepository>();
 builder.Services.AddScoped<IBlogPostRepository, BlogPostRepository>();
 builder.Services.AddScoped<IImageRepository, ImageRepository>();
 builder.Services.AddScoped<IBlogPostLikeRepository, BlogPostLikeRepository>();
-builder.Services.AddScoped<IBlogPostCommentRepository, BlogPostCommentRepository>(); 
+builder.Services.AddScoped<IBlogPostCommentRepository, BlogPostCommentRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 builder.Services.Configure<MailSettingModel>(
@@ -45,11 +76,46 @@ builder.Services.AddScoped<IMailService, MailService>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Apply migrations and seed using the SQL file (only when DB has no posts)
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var blogDb = services.GetRequiredService<BloggieDbContext>();
+        var authDb = services.GetRequiredService<AuthDbContext>();
+
+        // Apply migrations
+        blogDb.Database.Migrate();
+        authDb.Database.Migrate();
+
+        // If no blog posts exist, run the SQL seed file (if present)
+        if (!blogDb.BlogPosts.Any())
+        {
+            var seedFilePath = Path.Combine(AppContext.BaseDirectory, "seed", "dummydata.sql");
+            if (File.Exists(seedFilePath))
+            {
+                var sql = File.ReadAllText(seedFilePath);
+                if (!string.IsNullOrWhiteSpace(sql))
+                {
+                    // Execute raw SQL against Postgres (works for multiple statements)
+                    await blogDb.Database.ExecuteSqlRawAsync(sql);
+                }
+            }
+        }
+    }
+    catch (Exception ex)
+    {
+        // For demo: write to console for visibility. In production log properly.
+        Console.WriteLine($"Error applying migrations/seeding: {ex}");
+        throw;
+    }
+}
+
+// Configure pipeline (unchanged)
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -58,9 +124,8 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthentication();    //  newly added for authentication
-
-app.UseAuthorization();// before authorization  user should be  authentication is required so 
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
